@@ -51,7 +51,7 @@ services:
       - POSTGRES_DB=chatwoot
       - POSTGRES_USER=postgres
       # Igual ao POSTGRES_PASSWORD em env.deploy / .env da app.
-      - POSTGRES_PASSWORD=DEFINA_MESMA_SENHA_PG_DO_COMPOSE
+      - POSTGRES_PASSWORD=ddRWz0s69wEq1eQJd8Lc
 
   redis:
     image: redis:alpine
