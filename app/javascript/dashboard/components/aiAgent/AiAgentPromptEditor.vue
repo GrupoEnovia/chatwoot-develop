@@ -432,7 +432,7 @@ const removeBtnClass =
           <input
             v-model="form.company"
             type="text"
-            placeholder="Volponi Advogados"
+            placeholder="Chatwoot Agenda Inteligente"
             :class="inputClass"
           />
         </div>

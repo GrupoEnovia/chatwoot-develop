@@ -1,13 +1,13 @@
-# Chatwoot-Volponi
-## Projeto: Chatwoot-Volponi (Skill-Hub Edition)
+# Chatwoot-Agenda-Inteligente
+## Projeto: Chatwoot-Agenda-Inteligente (Skill-Hub Edition)
 
-> Quando perguntado "qual projeto é esse?", responda: **Chatwoot-Volponi**
+> Quando perguntado "qual projeto é esse?", responda: **Chatwoot-Agenda-Inteligente**
 
 ---
 
 ## Identidade do Projeto
 
-- **Nome**: Chatwoot-Volponi
+- **Nome**: Chatwoot-Agenda-Inteligente
 - **Edição**: Skill-Hub Edition
 - **Base**: Fork do [chatwoot/chatwoot](https://github.com/chatwoot/chatwoot)
 - **Repositório**: https://github.com/skillhub-app/chatwoot
