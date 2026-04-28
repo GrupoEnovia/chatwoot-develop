@@ -1,0 +1,10 @@
+json.id action.id
+json.kanban_automation_id action.kanban_automation_id
+json.action_type action.action_type
+json.position action.position
+json.delay_minutes action.delay_minutes
+json.delay_type action.delay_type
+json.active action.active
+json.config action.config
+json.created_at action.created_at.to_i
+json.updated_at action.updated_at.to_i

@@ -1,0 +1,11 @@
+json.id stage.id
+json.pipeline_id stage.pipeline_id
+json.name stage.name
+json.position stage.position
+json.color stage.color
+json.probability stage.probability
+json.is_won stage.is_won
+json.is_lost stage.is_lost
+json.items_count stage.kanban_items.size
+json.created_at stage.created_at.to_i
+json.updated_at stage.updated_at.to_i
