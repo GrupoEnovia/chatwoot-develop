@@ -1,8 +1,14 @@
+# Chatwoot-Agenda-Inteligente — imagem gerada a partir DESTE repositório (docker/Dockerfile).
+# Clone na VPS: git clone https://github.com/GrupoEnovia/chatwoot-develop.git
+# Não usa chatwoot/chatwoot do Docker Hub. Build: docker compose -f docker-compose.production.yaml build
 version: '3'
 
 services:
   base: &base
-    image: chatwoot/chatwoot:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: chatwoot-agenda-inteligente:production
     env_file: .env ## Change this file for customized env variables
     volumes:
       - storage_data:/app/storage

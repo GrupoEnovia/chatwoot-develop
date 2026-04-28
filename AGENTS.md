@@ -9,8 +9,7 @@
 
 - **Nome**: Chatwoot-Agenda-Inteligente
 - **Edição**: Skill-Hub Edition
-- **Base**: Fork do [chatwoot/chatwoot](https://github.com/chatwoot/chatwoot)
-- **Repositório**: https://github.com/skillhub-app/chatwoot
+- **Repositório**: https://github.com/GrupoEnovia/chatwoot-develop.git
 - **Branch principal**: `main`
 - **Branch de desenvolvimento**: `develop`
 - **Feature ativa**: `feature/kanban`
