@@ -1,17 +1,17 @@
 # Chatwoot-Agenda-Inteligente — app customizada (docker/Dockerfile).
 #
-# Swarm / Portainer: NÃO fazem build pelo YAML. A imagem vem do GitHub Container Registry:
+# --- Swarm / Portainer (sem build no YAML) ---
+# Imagem padrão abaixo é LOCAL: chatwoot-agenda-inteligente:production
+# OBRIGATÓRIO na VPS (pasta do clone do stack), antes do redeploy, UMA VEZ ou após mudar Dockerfile:
+#   docker compose -f docker-compose.production.yaml build --no-cache
+# (No manager do Swarm; se tiver workers, todo nó que rodar rails/sidekiq precisa da mesma imagem.)
+#
+# --- GHCR depois (opcional) ---
+# Quando o workflow Actions publicar com sucesso, você pode trocar "image" abaixo para:
 #   ghcr.io/grupoenovia/chatwoot-develop:production
-# (nome em minúsculas; publicado pelo workflow publish_agenda_inteligente_ghcr.yml no push.)
+# e no Portainer cadastrar o registry GHCR se o pacote for privado.
 #
-# Fluxo: push em main/develop → Actions publica a imagem → depois redeploy no Portainer
-# (ou espere o workflow terminar antes do redeploy na primeira vez).
-#
-# Pacote GHCR privado: em cada nó do Swarm, `docker login ghcr.io` com PAT.
-#
-# docker compose local (sem Swarm): "build" abaixo gera a mesma tag localmente.
-#
-# Aviso Swarm "ignoring 127.0.0.1": portas podem publicar em 0.0.0.0 — use firewall/proxy.
+# Aviso Swarm "ignoring 127.0.0.1": portas podem ir para 0.0.0.0 — firewall/proxy.
 #
 version: '3'
 
@@ -20,7 +20,7 @@ x-app: &app
   build:
     context: .
     dockerfile: docker/Dockerfile
-  image: ghcr.io/grupoenovia/chatwoot-develop:production
+  image: chatwoot-agenda-inteligente:production
   env_file: env.deploy ## versionado para deploy Git/Portainer; copie para .env local se preferir desenvolvimento
   volumes:
     - storage_data:/app/storage

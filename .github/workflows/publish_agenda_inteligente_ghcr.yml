@@ -1,8 +1,6 @@
-# Imagem usada por docker-compose.production.yaml (rails + sidekiq).
-# Docker Swarm / Portainer não executam "build" do compose — precisam dar pull
-# de um registry (GHCR). Rode este workflow com push em main/develop ou manualmente.
-#
-# Pacote: Settings → Actions → General → Workflow permissions: Read and write.
+# Publica a mesma imagem que o Swarm usa como CHATWOOT_APP_IMAGE (GHCR).
+# IMPORTANTE: todo push em main/develop roda o job — sem filtro de paths — para a tag
+# ghcr.io/...:production existir mesmo quando só mudam yaml/env/deploy.
 
 name: Publish Agenda Inteligente image (GHCR)
 
@@ -11,18 +9,15 @@ on:
     branches:
       - main
       - develop
-    paths:
-      - 'docker/**'
-      - 'Gemfile'
-      - 'Gemfile.lock'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/publish_agenda_inteligente_ghcr.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
+
+concurrency:
+  group: publish-agenda-ghcr-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   push-ghcr:
