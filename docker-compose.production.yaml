@@ -1,21 +1,17 @@
-# Chatwoot-Agenda-Inteligente — imagem customizada (docker/Dockerfile).
+# Chatwoot-Agenda-Inteligente — app customizada (docker/Dockerfile).
 #
-# --- Portainer em Docker Swarm ---
-# O Swarm IGNORA "build" e "restart" e EXIGE "image:". Erro "no image specified"
-# removemos antes ao tirar a linha image; ela precisa existir.
+# Swarm / Portainer: NÃO fazem build pelo YAML. A imagem vem do GitHub Container Registry:
+#   ghcr.io/grupoenovia/chatwoot-develop:production
+# (nome em minúsculas; publicado pelo workflow publish_agenda_inteligente_ghcr.yml no push.)
 #
-# Antes do redeploy (SSH na VPS, pasta do clone do stack, ex.: /data/compose/N/):
-#   docker compose -f docker-compose.production.yaml build
-#   docker tag <id ou nome gerado> chatwoot-agenda-inteligente:production
-# Em geral o build já aplica a tag se "image" estiver no YAML — então:
-#   docker compose -f docker-compose.production.yaml build
-# verifique: docker images | grep chatwoot-agenda-inteligente
+# Fluxo: push em main/develop → Actions publica a imagem → depois redeploy no Portainer
+# (ou espere o workflow terminar antes do redeploy na primeira vez).
 #
-# Aviso "ignoring IP-address 127.0.0.1": no Swarm a porta pode publicar em 0.0.0.0;
-# restrinja com firewall ou proxy reverso.
+# Pacote GHCR privado: em cada nó do Swarm, `docker login ghcr.io` com PAT.
 #
-# --- docker compose "standalone" (sem Swarm) ---
-# build + image juntos: primeiro build gera a tag local; "restart" vale (deploy é ignorado).
+# docker compose local (sem Swarm): "build" abaixo gera a mesma tag localmente.
+#
+# Aviso Swarm "ignoring 127.0.0.1": portas podem publicar em 0.0.0.0 — use firewall/proxy.
 #
 version: '3'
 
@@ -24,7 +20,7 @@ x-app: &app
   build:
     context: .
     dockerfile: docker/Dockerfile
-  image: chatwoot-agenda-inteligente:production
+  image: ghcr.io/grupoenovia/chatwoot-develop:production
   env_file: env.deploy ## versionado para deploy Git/Portainer; copie para .env local se preferir desenvolvimento
   volumes:
     - storage_data:/app/storage
