@@ -1,15 +1,22 @@
-# Chatwoot-Agenda-Inteligente — imagem só existe depois do build local (docker/Dockerfile).
-# Sem linha "image:" aqui: o Compose gera o nome da imagem (ex.: stack_rails) e não tenta
-# baixar chatwoot-agenda-inteligente:production da internet.
+# Chatwoot-Agenda-Inteligente — imagem customizada (docker/Dockerfile).
 #
-# Portainer NÃO constrói a imagem sozinho na maioria dos deploys: antes do redeploy,
-# na VPS (SSH), entre na pasta do clone do stack e rode UMA VEZ:
+# --- Portainer em Docker Swarm ---
+# O Swarm IGNORA "build" e "restart" e EXIGE "image:". Erro "no image specified"
+# removemos antes ao tirar a linha image; ela precisa existir.
+#
+# Antes do redeploy (SSH na VPS, pasta do clone do stack, ex.: /data/compose/N/):
 #   docker compose -f docker-compose.production.yaml build
-#   docker compose -f docker-compose.production.yaml up -d
-# Depois disso o redeploy no Portainer costuma funcionar (imagem já existe localmente).
+#   docker tag <id ou nome gerado> chatwoot-agenda-inteligente:production
+# Em geral o build já aplica a tag se "image" estiver no YAML — então:
+#   docker compose -f docker-compose.production.yaml build
+# verifique: docker images | grep chatwoot-agenda-inteligente
 #
-# Stack em modo Swarm: "build" no compose é ignorado — use CI + registry ou faça build na VM.
-# (Validador Compose v3 do Portainer: sem pull_policy.)
+# Aviso "ignoring IP-address 127.0.0.1": no Swarm a porta pode publicar em 0.0.0.0;
+# restrinja com firewall ou proxy reverso.
+#
+# --- docker compose "standalone" (sem Swarm) ---
+# build + image juntos: primeiro build gera a tag local; "restart" vale (deploy é ignorado).
+#
 version: '3'
 
 # Extensão: não vira container; só reutiliza bloco YAML em rails e sidekiq.
@@ -17,6 +24,7 @@ x-app: &app
   build:
     context: .
     dockerfile: docker/Dockerfile
+  image: chatwoot-agenda-inteligente:production
   env_file: env.deploy ## versionado para deploy Git/Portainer; copie para .env local se preferir desenvolvimento
   volumes:
     - storage_data:/app/storage
@@ -36,6 +44,9 @@ services:
     entrypoint: docker/entrypoints/rails.sh
     command: ['bundle', 'exec', 'rails', 's', '-p', '3000', '-b', '0.0.0.0']
     restart: always
+    deploy:
+      restart_policy:
+        condition: any
 
   sidekiq:
     <<: *app
@@ -48,6 +59,9 @@ services:
       - INSTALLATION_ENV=docker
     command: ['bundle', 'exec', 'sidekiq', '-C', 'config/sidekiq.yml']
     restart: always
+    deploy:
+      restart_policy:
+        condition: any
 
   postgres:
     image: pgvector/pgvector:pg16
@@ -61,6 +75,9 @@ services:
       - POSTGRES_USER=postgres
       # Igual ao POSTGRES_PASSWORD em env.deploy / .env da app.
       - POSTGRES_PASSWORD=ddRWz0s69wEq1eQJd8Lc
+    deploy:
+      restart_policy:
+        condition: any
 
   redis:
     image: redis:alpine
@@ -71,6 +88,9 @@ services:
       - redis_data:/data
     ports:
       - '127.0.0.1:6379:6379'
+    deploy:
+      restart_policy:
+        condition: any
 
 volumes:
   storage_data:
