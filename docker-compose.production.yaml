@@ -1,11 +1,15 @@
-# Chatwoot-Agenda-Inteligente — imagem gerada por build local (docker/Dockerfile).
-# Esta tag NÃO existe no Docker Hub; o nome é só o rótulo da imagem após o build.
+# Chatwoot-Agenda-Inteligente — imagem só existe depois do build local (docker/Dockerfile).
+# Sem linha "image:" aqui: o Compose gera o nome da imagem (ex.: stack_rails) e não tenta
+# baixar chatwoot-agenda-inteligente:production da internet.
 #
-# Primeira vez / após mudanças no Dockerfile (na VPS, na pasta do clone do Portainer):
+# Portainer NÃO constrói a imagem sozinho na maioria dos deploys: antes do redeploy,
+# na VPS (SSH), entre na pasta do clone do stack e rode UMA VEZ:
 #   docker compose -f docker-compose.production.yaml build
 #   docker compose -f docker-compose.production.yaml up -d
-# No Portainer: na stack use "Rebuild" ou editor + deploy com build habilitado.
-# (Versões antigas do validador aceitam só campos Compose v3; sem pull_policy aqui.)
+# Depois disso o redeploy no Portainer costuma funcionar (imagem já existe localmente).
+#
+# Stack em modo Swarm: "build" no compose é ignorado — use CI + registry ou faça build na VM.
+# (Validador Compose v3 do Portainer: sem pull_policy.)
 version: '3'
 
 # Extensão: não vira container; só reutiliza bloco YAML em rails e sidekiq.
@@ -13,7 +17,6 @@ x-app: &app
   build:
     context: .
     dockerfile: docker/Dockerfile
-  image: chatwoot-agenda-inteligente:production
   env_file: env.deploy ## versionado para deploy Git/Portainer; copie para .env local se preferir desenvolvimento
   volumes:
     - storage_data:/app/storage
