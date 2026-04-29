@@ -14,6 +14,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Validate deployment secrets
+        run: |
+          fail=0
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "::error::Defina o secret do repositório VPS_HOST (IP ou hostname da VPS, sem espaços)."
+            fail=1
+          fi
+          if [ -z "${{ secrets.VPS_USER }}" ]; then
+            echo "::error::Defina o secret do repositório VPS_USER (usuário SSH, ex.: root, ubuntu, deploy)."
+            fail=1
+          fi
+          if [ -z "${{ secrets.SSH_KEY }}" ]; then
+            echo "::error::Defina o secret do repositório SSH_KEY (chave privada PEM completa, linhas BEGIN/END OPENSSH/PRIVATE KEY)."
+            fail=1
+          fi
+          exit "$fail"
+
       - name: Build Docker image
         run: |
           docker build -f docker/Dockerfile -t volps/chatwoot:latest .
@@ -21,19 +38,23 @@ jobs:
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 700 ~/.ssh
+          # Remove CRLF (chaves copiadas do Windows quebram o OpenSSH)
+          echo "${{ secrets.SSH_KEY }}" | tr -d '\r' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          # Host obrigatório; falha de rede não aborta o job (o ssh abaixo usa StrictHostKeyChecking=no)
+          HOST="${{ secrets.VPS_HOST }}"
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
 
       - name: Transfer image to VPS
         run: |
           docker save volps/chatwoot:latest | gzip | \
-            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -o UserKnownHostsFile=~/.ssh/known_hosts \
               ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
               "docker load"
 
       - name: Deploy and migrate on VPS
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
