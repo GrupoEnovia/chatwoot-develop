@@ -5,9 +5,7 @@
 #   docker compose -f docker-compose.production.yaml build
 #   docker compose -f docker-compose.production.yaml up -d
 # No Portainer: na stack use "Rebuild" ou editor + deploy com build habilitado.
-#
-# Pull policy "never": evita que o Compose tente baixar chatwoot-agenda-inteligente:production
-# da internet (só existe depois do build).
+# (Versões antigas do validador aceitam só campos Compose v3; sem pull_policy aqui.)
 version: '3'
 
 # Extensão: não vira container; só reutiliza bloco YAML em rails e sidekiq.
@@ -16,7 +14,6 @@ x-app: &app
     context: .
     dockerfile: docker/Dockerfile
   image: chatwoot-agenda-inteligente:production
-  pull_policy: never
   env_file: env.deploy ## versionado para deploy Git/Portainer; copie para .env local se preferir desenvolvimento
   volumes:
     - storage_data:/app/storage
