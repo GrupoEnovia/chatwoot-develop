@@ -1,20 +1,29 @@
-# Chatwoot-Agenda-Inteligente — imagem gerada a partir DESTE repositório (docker/Dockerfile).
-# Clone na VPS: git clone https://github.com/GrupoEnovia/chatwoot-develop.git
-# Não usa chatwoot/chatwoot do Docker Hub. Build: docker compose -f docker-compose.production.yaml build
+# Chatwoot-Agenda-Inteligente — imagem gerada por build local (docker/Dockerfile).
+# Esta tag NÃO existe no Docker Hub; o nome é só o rótulo da imagem após o build.
+#
+# Primeira vez / após mudanças no Dockerfile (na VPS, na pasta do clone do Portainer):
+#   docker compose -f docker-compose.production.yaml build
+#   docker compose -f docker-compose.production.yaml up -d
+# No Portainer: na stack use "Rebuild" ou editor + deploy com build habilitado.
+#
+# Pull policy "never": evita que o Compose tente baixar chatwoot-agenda-inteligente:production
+# da internet (só existe depois do build).
 version: '3'
 
-services:
-  base: &base
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-    image: chatwoot-agenda-inteligente:production
-    env_file: env.deploy ## versionado para deploy Git/Portainer; copie para .env local se preferir desenvolvimento
-    volumes:
-      - storage_data:/app/storage
+# Extensão: não vira container; só reutiliza bloco YAML em rails e sidekiq.
+x-app: &app
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+  image: chatwoot-agenda-inteligente:production
+  pull_policy: never
+  env_file: env.deploy ## versionado para deploy Git/Portainer; copie para .env local se preferir desenvolvimento
+  volumes:
+    - storage_data:/app/storage
 
+services:
   rails:
-    <<: *base
+    <<: *app
     depends_on:
       - postgres
       - redis
@@ -29,7 +38,7 @@ services:
     restart: always
 
   sidekiq:
-    <<: *base
+    <<: *app
     depends_on:
       - postgres
       - redis
